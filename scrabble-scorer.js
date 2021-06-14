@@ -1,72 +1,114 @@
 // inspired by https://exercism.io/tracks/javascript/exercises/etl/solutions/91f99a3cca9548cebe5975d7ebca6a85
-
-const input = require("readline-sync");
-
-const oldPointStructure = {
-  1: ['A', 'E', 'I', 'O', 'U', 'L', 'N', 'R', 'S', 'T'],
-  2: ['D', 'G'],
-  3: ['B', 'C', 'M', 'P'],
-  4: ['F', 'H', 'V', 'W', 'Y'],
-  5: ['K'],
-  8: ['J', 'X'],
-  10: ['Q', 'Z']
-};
-
-function oldScrabbleScorer(word) {
-	word = word.toUpperCase();
-	let letterPoints = "";
- 
-	for (let i = 0; i < word.length; i++) {
- 
-	  for (const pointValue in oldPointStructure) {
- 
-		 if (oldPointStructure[pointValue].includes(word[i])) {
-			letterPoints += `Points for '${word[i]}': ${pointValue}\n`
-		 }
- 
-	  }
-	}
-	return letterPoints;
- }
-
-// your job is to finish writing these functions and variables that we've named //
-// don't change the names or your program won't work as expected. //
-
-function initialPrompt() {
-   console.log("Let's play some scrabble! Enter a word:");
-};
-
-let simpleScore;
-
-let vowelBonusScore;
-
-let scrabbleScore;
-
-const scoringAlgorithms = [];
-
-function scorerPrompt() {}
-
-function transform() {};
-
-let newPointStructure;
-
-function runProgram() {
-   initialPrompt();
-   
+const input = require('readline-sync')
+// Code your transform function here:
+function transform (object) {
+  let newObject = {};
+  for (item in object){
+    for (let i=0; i<object[item].length; i++){
+      newObject[object[item][i]]= item
+    } 
+  }
+  return newObject;
 }
 
-// Don't write any code below this line //
-// And don't change these or your program will not run as expected //
-module.exports = {
-   initialPrompt: initialPrompt,
-   transform: transform,
-   oldPointStructure: oldPointStructure,
-   simpleScore: simpleScore,
-   vowelBonusScore: vowelBonusScore,
-   scrabbleScore: scrabbleScore,
-   scoringAlgorithms: scoringAlgorithms,
-   newPointStructure: newPointStructure,
-	runProgram: runProgram,
-	scorerPrompt: scorerPrompt
+
+
+
+// Code your initialPrompt function here:
+function intialPrompt() {
+  console.log(`Welcome to the Scrabble score calculator!\nWhich scoring algorithm would you like to use?
+0 - Scrabble: The traditional scoring algorithm.
+1 - Simple Score: Each letter is worth 1 point.
+2 - Bonus Vowels: Vowels are worth 3 pts, and consonants are 1 pt`);
+
+  let system = Number(input.question("Enter 0, 1, or 2: "));
+  return system;
+  
+}
+
+// Code your runProgram function here:
+
+
+// Here is the oldPointStructure object:
+const oldPointStructure = {
+   1: ['A', 'E', 'I', 'O', 'U', 'L', 'N', 'R', 'S', 'T'],
+   2: ['D', 'G'],
+   3: ['B', 'C', 'M', 'P'],
+   4: ['F', 'H', 'V', 'W', 'Y'],
+   5: ['K'],
+   8: ['J', 'X'],
+   10: ['Q', 'Z']
 };
 
+let newPointStructure = transform (oldPointStructure);
+
+
+function simpleScorer (word){
+  return word.length
+}
+
+function bonusVowels (word){
+  let vowels = ["a", "e", "i", "o", "u"];
+  let lower = word.toLowerCase();
+  let total = 0;
+  for (let i=0; i<lower.length; i++){
+    if(vowels.includes(lower[i])===true){
+      total +=3;
+    } else {
+      total +=1
+    }
+  }
+  return total
+  }
+
+
+function scrabbleScorer (word, structure=newPointStructure){
+  let total = 0;
+  let casedWord = word.toUpperCase()
+  for (let i=0; i<casedWord.length;i++){
+    for (item in newPointStructure){
+      if (item.includes(casedWord[i])===true){
+        total += Number(newPointStructure[item])
+      }
+  }
+  
+}
+return total
+}
+
+const scrabble = {
+  name : "Scrabble",
+  description : "The traditional scoring algorithm.",
+  scoreFunction : function (string){return scrabbleScorer(string)}
+};
+
+const simple = {
+  name : "Simple Scorer",
+  description : "Each letter is worth 1 point.",
+  scoreFunction : function (string){return simpleScorer(string)}
+};
+
+const bonus = {
+  name : "Bonus Vowels",
+  description : "Vowels are 3 pts, consonants are 1 pt.",
+  scoreFunction : function (string){return bonusVowels(string)}
+};
+
+let scoringAlgorithms = [scrabble, simple, bonus];
+
+
+// Call the runProgram function here:
+
+function RunProgram (algorithms){
+  let x = intialPrompt()
+ 
+  let wordToScore= ""
+  while (wordToScore !== "stop"){
+    wordToScore= input.question("Enter a word to score or type stop to end: ");
+    console.log(`Score for ${wordToScore}: ${algorithms[x].scoreFunction(wordToScore)}`);
+    
+  }
+  
+}
+
+RunProgram(scoringAlgorithms)
